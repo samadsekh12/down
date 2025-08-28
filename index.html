@@ -1,153 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>All‑in‑One Video Downloader</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Universal Video Downloader</title>
+<meta name="description" content="Paste any video link and download in MP4 or MP3. Supports YouTube, Facebook, Instagram, X/Twitter, TikTok, LinkedIn, Vimeo.">
 <style>
-  body {margin:0; font-family:system-ui,sans-serif; background:#0d1117; color:#e6edf3;}
-  header,footer {background:#161b22; padding:1rem 2rem; border-bottom:1px solid #30363d;}
-  h1 {margin:0; color:#58a6ff;}
-  .grid {display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; padding:1.5rem;}
-  .card {background:#161b22; border:1px solid #30363d; border-radius:10px; padding:1rem; cursor:pointer; text-align:center; transition:0.2s;}
-  .card:hover {border-color:#58a6ff; transform:translateY(-2px);}
-  .hidden {display:none;}
-  ul {list-style:none; padding:0;}
-  li {background:#161b22; border:1px solid #30363d; border-radius:8px; padding:0.5rem 1rem; margin-bottom:0.5rem;
-      display:flex; justify-content:space-between; align-items:center;}
-  a.btn, button.btn {background:#58a6ff; color:#fff; padding:0.3rem 0.7rem; border-radius:4px; text-decoration:none; border:none; cursor:pointer;}
-  button.back {background:none; border:none; color:#58a6ff; cursor:pointer; margin-bottom:1rem; font-size:0.9rem;}
-  form label {display:block; margin:0.5rem 0 0.25rem;}
-  form input,form select {width:100%; padding:0.5rem; border-radius:6px; border:1px solid #30363d; background:#0d1117; color:#e6edf3;}
+  :root{
+    --bg:#0d1117;--panel:#161b22;--text:#e6edf3;--muted:#8b949e;
+    --accent:#58a6ff;--border:#30363d;--ok:#2ea043;--warn:#d29922;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text)}
+  header{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--border);padding:1rem 1.25rem}
+  header h1{margin:0;font-size:1.25rem;color:var(--accent)}
+  main{max-width:980px;margin:2rem auto;padding:0 1rem}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1rem}
+  .row{display:grid;grid-template-columns:1fr auto;gap:.75rem}
+  input[type=url],select{width:100%;padding:.7rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)}
+  button{border:none;border-radius:8px;padding:.7rem 1rem;cursor:pointer}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-ghost{background:transparent;color:var(--accent)}
+  .btn-ok{background:var(--ok);color:#fff}
+  .btn-warn{background:var(--warn);color:#0d1117}
+  .hint{color:var(--muted);font-size:.9rem;margin-top:.5rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem}
+  .pill{display:inline-flex;gap:.35rem;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:.25rem .6rem;font-size:.85rem;color:var(--muted)}
+  .results{margin-top:1rem}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:.6rem;border-bottom:1px solid var(--border);text-align:left}
+  .thumb{width:56px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border)}
+  .flex{display:flex;align-items:center;gap:.75rem}
+  .bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+  .foot{margin-top:2rem;color:var(--muted);font-size:.85rem}
+  .tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
+  .tag{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.25rem .5rem;font-size:.8rem;color:var(--muted)}
+  .hidden{display:none !important}
 </style>
 </head>
 <body>
-
-<header>
-  <h1>All‑in‑One Video Downloader</h1>
-</header>
-
+<header><h1>Universal Video Downloader</h1></header>
 <main>
-  <!-- Home (categories) -->
-  <div id="home" class="grid"></div>
 
-  <!-- Category view -->
-  <div id="categoryView" class="hidden">
-    <button class="back" onclick="showHome()">← Back to categories</button>
-    <h2 id="catTitle"></h2>
-    <ul id="toolList"></ul>
-  </div>
-
-  <!-- Tool form view -->
-  <div id="toolView" class="hidden">
-    <button class="back" onclick="backToCategory()">← Back to tools</button>
-    <h2 id="toolTitle"></h2>
-    <form id="downloadForm">
-      <label for="videoURL">Enter video link:</label>
-      <input type="url" id="videoURL" name="videoURL" placeholder="Paste your link" required>
-
-      <label for="format">Choose format:</label>
-      <select id="format" name="format">
-        <option value="mp4_360">MP4 360p</option>
-        <option value="mp4_720">MP4 720p (HD)</option>
-        <option value="mp4_1080">MP4 1080p (Full HD)</option>
-        <option value="mp4_2160">MP4 2160p (4K with sound)</option>
-        <option value="mp3">MP3 Audio</option>
+  <section class="card">
+    <h2 style="margin:.2rem 0 1rem">Paste a link</h2>
+    <div class="row">
+      <input type="url" id="url" placeholder="e.g., https://www.youtube.com/watch?v=... or https://www.facebook.com/...">
+      <button id="pasteBtn" class="btn-ghost" title="Paste from clipboard">Paste</button>
+      <button id="analyzeBtn" class="btn-primary">Analyze</button>
+    </div>
+    <div class="bar">
+      <select id="format">
+        <option value="auto">Auto format (best)</option>
+        <option value="mp4">MP4 (video + audio)</option>
+        <option value="mp3">MP3 (audio only)</option>
       </select>
+      <select id="quality">
+        <option value="best">Best available</option>
+        <option value="360p">360p</option>
+        <option value="720p">720p HD</option>
+        <option value="1080p">1080p Full HD</option>
+        <option value="2160p">2160p 4K (with sound)</option>
+      </select>
+      <select id="platform">
+        <option value="auto">Auto‑detect platform</option>
+        <option value="youtube">YouTube</option>
+        <option value="facebook">Facebook</option>
+        <option value="instagram">Instagram</option>
+        <option value="twitter">X/Twitter</option>
+        <option value="tiktok">TikTok</option>
+        <option value="linkedin">LinkedIn</option>
+        <option value="vimeo">Vimeo</option>
+        <option value="dailymotion">Dailymotion</option>
+        <option value="sharechat">ShareChat</option>
+        <option value="roposo">Roposo</option>
+      </select>
+    </div>
+    <p class="hint">Only download content you own or have permission to save. Respect platform Terms of Service.</p>
+  </section>
 
-      <button type="submit" class="btn" style="margin-top:1rem;">Download</button>
-    </form>
-    <div id="result" style="margin-top:1rem;"></div>
-  </div>
+  <section id="meta" class="card hidden">
+    <div class="flex">
+      <img id="thumb" class="thumb" alt="">
+      <div>
+        <div id="title" style="font-weight:600;line-height:1.2"></div>
+        <div class="tags" id="tags"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" class="card results hidden">
+    <h3 style="margin:.2rem 0 1rem">Available downloads</h3>
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Quality</th>
+          <th>Container</th>
+          <th>Audio</th>
+          <th>Size</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </section>
+
+  <p class="foot">Tip: Bookmark this page. It supports most public links: YouTube, Facebook, Instagram, X/Twitter, TikTok, LinkedIn, Vimeo, Dailymotion, ShareChat, Roposo.</p>
+
 </main>
 
-<footer>
-  &copy; 2025 YourBrand — Only download content you own or have permission to save.
-</footer>
-
 <script>
-const data = {
-  "YouTube": [
-    { name:"Y2Mate", url:"https://www.y2mate.com/en/youtube" },
-    { name:"SaveFrom.net", url:"https://en.savefrom.net" }
-  ],
-  "Facebook": [
-    { name:"Fbdown.net", url:"https://fbdown.net" },
-    { name:"SnapSave", url:"https://snapsave.app" }
-  ],
-  "Instagram": [
-    { name:"DownloadGram", url:"https://downloadgram.org" },
-    { name:"InstaDownload", url:"https://instadownload.app" }
-  ],
-  "Twitter/X": [
-    { name:"SaveTweetVid", url:"https://www.savetweetvid.com" },
-    { name:"sssTwitter", url:"https://ssstwitter.com" }
-  ],
-  "LinkedIn": [
-    { name:"ExpertsPHP LinkedIn DL", url:"https://www.expertsphp.com/linkedin-video-downloader.html" }
-  ],
-  "Universal": [
-    { name:"9xbuddy", url:"https://9xbuddy.org" },
-    { name:"Keepvid.pro", url:"https://keepvid.pro" }
-  ]
-};
+/* ====== CONFIG ====== */
+const USE_MOCK = true; // set to false after you connect the backend
+const API_BASE = "";    // e.g., "https://api.yourbrand.com" when backend is live
 
-let currentCategory = '';
-let currentTool = null;
+/* ====== HELPERS ====== */
+const $ = sel => document.querySelector(sel);
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
 
-// Render home
-const homeDiv = document.getElementById('home');
-Object.keys(data).forEach(cat=>{
-  const div = document.createElement('div');
-  div.className='card';
-  div.textContent = cat;
-  div.onclick = ()=>showCategory(cat);
-  homeDiv.appendChild(div);
+const PLATFORMS = [
+  {key:'youtube', patterns:[/youtu\.be\//,/youtube\.com/]},
+  {key:'facebook', patterns:[/facebook\.com/]},
+  {key:'instagram', patterns:[/instagram\.com/]},
+  {key:'twitter', patterns:[/(?:twitter\.com|x\.com)/]},
+  {key:'tiktok', patterns:[/tiktok\.com/]},
+  {key:'linkedin', patterns:[/linkedin\.com/]},
+  {key:'vimeo', patterns:[/vimeo\.com/]},
+  {key:'dailymotion', patterns:[/dai\.ly|dailymotion\.com/]},
+  {key:'sharechat', patterns:[/sharechat\.com/]},
+  {key:'roposo', patterns:[/roposo\.com/]}
+];
+
+function detectPlatform(url){
+  if(!url) return 'auto';
+  const host = url.toLowerCase();
+  for(const p of PLATFORMS){
+    if(p.patterns.some(rx=>rx.test(host))) return p.key;
+  }
+  return 'auto';
+}
+
+function humanSize(bytes){
+  if(!bytes) return '—';
+  const units = ['B','KB','MB','GB','TB'];
+  let i=0, n=bytes;
+  while(n>=1024 && i<units.length-1){ n/=1024; i++; }
+  return `${n.toFixed(n<10?2:n<100?1:0)} ${units[i]}`;
+}
+
+/* ====== MOCK ANALYZE/DOWNLOAD ====== */
+async function mockAnalyze(url, platform, format, quality){
+  await sleep(500);
+  const title = `Sample from ${platform.toUpperCase()}`;
+  const thumb = `https://picsum.photos/seed/${encodeURIComponent(platform)}/160/90`;
+  const streams = [];
+
+  // Video+audio options
+  const qList = ['360p','720p','1080p','2160p'];
+  qList.forEach((q,i)=>{
+    streams.push({
+      id:`${platform}-${q}-mp4`,
+      type:'video',
+      container:'mp4',
+      quality:q,
+      hasAudio:true,
+      size:(50*(i+1))*1024*1024 // bytes
+    });
+  });
+
+  // Audio-only MP3
+  [128,192,320].forEach(kbps=>{
+    streams.push({
+      id:`${platform}-${kbps}k-mp3`,
+      type:'audio',
+      container:'mp3',
+      quality:`${kbps} kbps`,
+      hasAudio:true,
+      size: (8 + (kbps/128)*4) * 1024 * 1024
+    });
+  });
+
+  // Filter by requested quality/format (best‑effort)
+  let filtered = streams;
+  if(format && format!=='auto'){
+    filtered = filtered.filter(s => format==='mp3' ? s.container==='mp3' : s.container==='mp4');
+  }
+  if(quality && quality!=='best'){
+    filtered = filtered.filter(s => s.quality===quality);
+  }
+  if(!filtered.length) filtered = streams;
+  return { platform, title, thumb, streams: filtered };
+}
+
+async function mockDownload(id){
+  // Create a demo text blob to simulate a file download
+  const blob = new Blob([`This simulates a download for ${id}.\nReplace mockDownload with real API call.`], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${id}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* ====== REAL API CALLS (wire up your backend) ====== */
+async function realAnalyze(link, platform, format, quality){
+  const params = new URLSearchParams({ url: link, platform, format, quality });
+  const res = await fetch(`${API_BASE}/api/analyze?${params.toString()}`, { mode:'cors' });
+  if(!res.ok) throw new Error('Analyze failed');
+  return await res.json();
+}
+
+async function realDownload(streamId){
+  // Either redirect to a signed URL, or start a fetch/stream
+  window.location.href = `${API_BASE}/api/download?id=${encodeURIComponent(streamId)}`;
+}
+
+/* ====== UI LOGIC ====== */
+const urlInput = $('#url');
+const platformSel = $('#platform');
+const formatSel = $('#format');
+const qualitySel = $('#quality');
+const analyzeBtn = $('#analyzeBtn');
+const pasteBtn = $('#pasteBtn');
+
+pasteBtn.addEventListener('click', async ()=>{
+  try{
+    const text = await navigator.clipboard.readText();
+    if(text) { urlInput.value = text.trim(); urlInput.focus(); }
+  }catch(e){ alert('Clipboard not available. Paste manually.'); }
 });
 
-function showCategory(cat){
-  currentCategory = cat;
-  document.getElementById('home').classList.add('hidden');
-  document.getElementById('categoryView').classList.remove('hidden');
-  document.getElementById('catTitle').textContent = cat+" Downloaders";
-  const ul = document.getElementById('toolList');
-  ul.innerHTML = '';
-  data[cat].forEach(tool=>{
-    const li = document.createElement('li');
-    li.innerHTML = `<span>${tool.name}</span> <button class="btn" onclick='openTool(${JSON.stringify(tool)})'>Open</button>`;
-    ul.appendChild(li);
+urlInput.addEventListener('input', ()=>{
+  const p = detectPlatform(urlInput.value);
+  platformSel.value = p;
+});
+
+analyzeBtn.addEventListener('click', async ()=>{
+  const link = urlInput.value.trim();
+  if(!link){ alert('Please paste a valid link.'); return; }
+  const chosenPlatform = platformSel.value === 'auto' ? detectPlatform(link) : platformSel.value;
+  if(chosenPlatform === 'auto'){ alert('Unknown platform. Select one from the list.'); return; }
+  try{
+    analyzeBtn.disabled = true; analyzeBtn.textContent = 'Analyzing...';
+    const format = formatSel.value; const quality = qualitySel.value;
+
+    const data = USE_MOCK
+      ? await mockAnalyze(link, chosenPlatform, format, quality)
+      : await realAnalyze(link, chosenPlatform, format, quality);
+
+    renderMeta(data);
+    renderResults(data);
+  }catch(err){
+    alert('Could not analyze this link. Try a different one or check your backend.');
+    console.error(err);
+  }finally{
+    analyzeBtn.disabled = false; analyzeBtn.textContent = 'Analyze';
+  }
+});
+
+function renderMeta({title, thumb, platform}){
+  $('#meta').classList.remove('hidden');
+  $('#thumb').src = thumb;
+  $('#thumb').alt = `Thumbnail`;
+  $('#title').textContent = title || 'Untitled';
+  const tags = $('#tags');
+  tags.innerHTML = '';
+  const chips = [
+    {label:'Platform', val: platform},
+    {label:'Requested', val: `${formatSel.value.toUpperCase()} / ${qualitySel.value}`}
+  ];
+  chips.forEach(c=>{
+    const span = document.createElement('span');
+    span.className='tag';
+    span.textContent = `${c.label}: ${c.val}`;
+    tags.appendChild(span);
   });
 }
 
-function showHome(){
-  document.getElementById('categoryView').classList.add('hidden');
-  document.getElementById('toolView').classList.add('hidden');
-  document.getElementById('home').classList.remove('hidden');
-}
+function renderResults({streams}){
+  const tbody = $('#tbody');
+  tbody.innerHTML = '';
+  streams.forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.type}</td>
+      <td>${s.quality}</td>
+      <td>${s.container.toUpperCase()}</td>
+      <td>${s.hasAudio ? 'Yes' : 'No'}</td>
+      <td>${humanSize(s.size)}</td>
+      <td><button class="btn-ok" data-id="${s.id}">Get link</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  $('#results').classList.remove('hidden');
 
-function backToCategory(){
-  document.getElementById('toolView').classList.add('hidden');
-  document.getElementById('categoryView').classList.remove('hidden');
+  // Wire download buttons
+  tbody.querySelectorAll('button.btn-ok').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-id');
+      btn.disabled = true; const old = btn.textContent; btn.textContent = 'Preparing...';
+      try{
+        if(USE_MOCK) await mockDownload(id);
+        else await realDownload(id);
+      }catch(e){
+        alert('Download failed. Try another format or check backend.');
+        console.error(e);
+      }finally{
+        btn.disabled = false; btn.textContent = old;
+      }
+    });
+  });
 }
-
-function openTool(tool){
-  currentTool = tool;
-  document.getElementById('categoryView').classList.add('hidden');
-  document.getElementById('toolView').classList.remove('hidden');
-  document.getElementById('toolTitle').textContent = currentTool.name;
-  document.getElementById('videoURL').value = '';
-  document.getElementById('result').textContent = '';
-}
-
-// Form submit (placeholder)
-document.getElementById('downloadForm').addEventListener('submit', e=>{
-  e.preventDefault();
-  const link = document.getElementById('videoURL').value;
-  const format = document.getElementById('format').value;
-  document.getElementById('result').textContent =
-    `Pretend downloading ${format} from ${currentTool.name} for link: ${link}`;
-});
 </script>
-
 </body>
 </html>
