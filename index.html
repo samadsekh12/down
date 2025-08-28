@@ -5,40 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>All‑in‑One Video Downloader</title>
 <style>
-  body {
-    margin:0; font-family: system-ui, sans-serif;
-    background:#0d1117; color:#e6edf3;
-  }
-  header, footer {
-    background:#161b22; padding:1rem 2rem;
-    border-bottom:1px solid #30363d;
-  }
-  h1 { margin:0; color:#58a6ff; font-size:1.5rem; }
-  .grid {
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:1rem; padding:1.5rem;
-  }
-  .card {
-    background:#161b22; border:1px solid #30363d;
-    border-radius:10px; padding:1rem; cursor:pointer;
-    text-align:center; transition:0.2s;
-  }
-  .card:hover { border-color:#58a6ff; transform:translateY(-2px); }
-  .hidden { display:none; }
-  ul { list-style:none; padding:0; }
-  li {
-    background:#161b22; border:1px solid #30363d; border-radius:8px;
-    padding:0.5rem 1rem; margin-bottom:0.5rem;
-    display:flex; justify-content:space-between; align-items:center;
-  }
-  a.btn {
-    background:#58a6ff; color:#fff; padding:0.3rem 0.7rem;
-    border-radius:4px; text-decoration:none;
-  }
-  button.back {
-    background:none; border:none; color:#58a6ff; cursor:pointer;
-    margin-bottom:1rem; font-size:0.9rem;
-  }
+  body {margin:0; font-family:system-ui,sans-serif; background:#0d1117; color:#e6edf3;}
+  header,footer {background:#161b22; padding:1rem 2rem; border-bottom:1px solid #30363d;}
+  h1 {margin:0; color:#58a6ff;}
+  .grid {display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; padding:1.5rem;}
+  .card {background:#161b22; border:1px solid #30363d; border-radius:10px; padding:1rem; cursor:pointer; text-align:center; transition:0.2s;}
+  .card:hover {border-color:#58a6ff; transform:translateY(-2px);}
+  .hidden {display:none;}
+  ul {list-style:none; padding:0;}
+  li {background:#161b22; border:1px solid #30363d; border-radius:8px; padding:0.5rem 1rem; margin-bottom:0.5rem;
+      display:flex; justify-content:space-between; align-items:center;}
+  a.btn, button.btn {background:#58a6ff; color:#fff; padding:0.3rem 0.7rem; border-radius:4px; text-decoration:none; border:none; cursor:pointer;}
+  button.back {background:none; border:none; color:#58a6ff; cursor:pointer; margin-bottom:1rem; font-size:0.9rem;}
+  form label {display:block; margin:0.5rem 0 0.25rem;}
+  form input,form select {width:100%; padding:0.5rem; border-radius:6px; border:1px solid #30363d; background:#0d1117; color:#e6edf3;}
 </style>
 </head>
 <body>
@@ -56,6 +36,28 @@
     <button class="back" onclick="showHome()">← Back to categories</button>
     <h2 id="catTitle"></h2>
     <ul id="toolList"></ul>
+  </div>
+
+  <!-- Tool form view -->
+  <div id="toolView" class="hidden">
+    <button class="back" onclick="backToCategory()">← Back to tools</button>
+    <h2 id="toolTitle"></h2>
+    <form id="downloadForm">
+      <label for="videoURL">Enter video link:</label>
+      <input type="url" id="videoURL" name="videoURL" placeholder="Paste your link" required>
+
+      <label for="format">Choose format:</label>
+      <select id="format" name="format">
+        <option value="mp4_360">MP4 360p</option>
+        <option value="mp4_720">MP4 720p (HD)</option>
+        <option value="mp4_1080">MP4 1080p (Full HD)</option>
+        <option value="mp4_2160">MP4 2160p (4K with sound)</option>
+        <option value="mp3">MP3 Audio</option>
+      </select>
+
+      <button type="submit" class="btn" style="margin-top:1rem;">Download</button>
+    </form>
+    <div id="result" style="margin-top:1rem;"></div>
   </div>
 </main>
 
@@ -90,7 +92,10 @@ const data = {
   ]
 };
 
-// Render home cards
+let currentCategory = '';
+let currentTool = null;
+
+// Render home
 const homeDiv = document.getElementById('home');
 Object.keys(data).forEach(cat=>{
   const div = document.createElement('div');
@@ -101,6 +106,7 @@ Object.keys(data).forEach(cat=>{
 });
 
 function showCategory(cat){
+  currentCategory = cat;
   document.getElementById('home').classList.add('hidden');
   document.getElementById('categoryView').classList.remove('hidden');
   document.getElementById('catTitle').textContent = cat+" Downloaders";
@@ -108,15 +114,39 @@ function showCategory(cat){
   ul.innerHTML = '';
   data[cat].forEach(tool=>{
     const li = document.createElement('li');
-    li.innerHTML = `<span>${tool.name}</span> <a class="btn" href="${tool.url}" target="_blank">Visit</a>`;
+    li.innerHTML = `<span>${tool.name}</span> <button class="btn" onclick='openTool(${JSON.stringify(tool)})'>Open</button>`;
     ul.appendChild(li);
   });
 }
 
 function showHome(){
   document.getElementById('categoryView').classList.add('hidden');
+  document.getElementById('toolView').classList.add('hidden');
   document.getElementById('home').classList.remove('hidden');
 }
+
+function backToCategory(){
+  document.getElementById('toolView').classList.add('hidden');
+  document.getElementById('categoryView').classList.remove('hidden');
+}
+
+function openTool(tool){
+  currentTool = tool;
+  document.getElementById('categoryView').classList.add('hidden');
+  document.getElementById('toolView').classList.remove('hidden');
+  document.getElementById('toolTitle').textContent = currentTool.name;
+  document.getElementById('videoURL').value = '';
+  document.getElementById('result').textContent = '';
+}
+
+// Form submit (placeholder)
+document.getElementById('downloadForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const link = document.getElementById('videoURL').value;
+  const format = document.getElementById('format').value;
+  document.getElementById('result').textContent =
+    `Pretend downloading ${format} from ${currentTool.name} for link: ${link}`;
+});
 </script>
 
 </body>
